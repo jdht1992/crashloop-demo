@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-crash-port-app
+  labels:
+    app: fastapi-crash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-crash-port
+  template:
+    metadata:
+      labels:
+        app: fastapi-crash-port
+    spec:
+      containers:
+      - name: fastapi
+        image: fastapi-crash-port-demo:latest
+        args: ["uvicorn", "main:app", "--port", "puerto-invalido"]
+        imagePullPolicy: Never  # <--- Obliga a buscar solo en local
+        ports:
+        - containerPort: 8000
+
+        # Startup Probe: Kubernetes espera a que esta prueba pase antes de activar las demás sondas
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8000
+          failureThreshold: 3
+          periodSeconds: 5
+
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
