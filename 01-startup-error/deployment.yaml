@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-crash-app
+  labels:
+    app: fastapi-crash
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fastapi-crash
+  template:
+    metadata:
+      labels:
+        app: fastapi-crash
+    spec:
+      containers:
+      - name: fastapi
+        image: fastapi-crash-demo:latest
+        imagePullPolicy: Never  # <--- Obliga a buscar solo en local
+        ports:
+        - containerPort: 8000
+        
+        # Simulamos el error de producción: Omitimos deliberadamente 
+        # la variable obligatoria 'DATABASE_URL'.
+        env:
+        - name: APP_ENV
+          value: "production"
+        # - name: DATABASE_URL
+        #   value: "postgresql://user:password@rds-db:5432/main"
+
+        # Startup Probe: Kubernetes espera a que esta prueba pase antes de activar las demás sondas
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8000
+          failureThreshold: 3
+          periodSeconds: 5
+
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
