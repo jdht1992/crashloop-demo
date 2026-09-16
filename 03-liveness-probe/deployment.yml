@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-crash-liveness-app
+  labels:
+    app: fastapi-crash-liveness
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-crash-liveness
+  template:
+    metadata:
+      labels:
+        app: fastapi-crash-liveness
+    spec:
+      containers:
+      - name: fastapi
+        image: fastapi-crash-liveness-demo:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8000
+        
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 3
+
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
