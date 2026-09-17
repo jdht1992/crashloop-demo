@@ -1,30 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fastapi-dependency-failure
+  name: fastapi-missing-config
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: fastapi-dep-failure
+      app: fastapi-config
   template:
     metadata:
       labels:
-        app: fastapi-dep-failure
+        app: fastapi-config
     spec:
       containers:
       - name: fastapi
-        image: fastapi-crash-dep-failure:latest
-        imagePullPolicy: Never
+        image: fastapi-crash-test:latest
         ports:
         - containerPort: 8000
-        # Como no existe ningún servicio llamado 'db-service' en el cluster, 
-        # el script fallará al intentar hacer el socket.create_connection.
+        # No se define el volumen con el archivo de configuración, por lo que fallará
       
         resources:
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
